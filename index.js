@@ -2,7 +2,8 @@ var fs = require('fs');
 var path = require('path');
 var SourceMapConsumer = require('source-map').SourceMapConsumer;
 
-var options = {style: 'ansi'};
+var options = {style: 'ansi', editor: 'webstorm'};
+
 // copied colors from color.js
 var colorWrap = {
 	//grayscale
@@ -115,6 +116,9 @@ module.exports = {
 	color: function (enable) {
 		options.style = enable ? 'ansi' : false;
 	},
+	editor: function(editor) {
+		options.editor = editor ? editor : 'webstorm';
+	},
 	reporter: function (errors, data) {
 		var path = require('path');
 
@@ -179,8 +183,14 @@ module.exports = {
 					}
 
 					var position = mapSourcePosition({source:file, line:err.line, column: err.character});
+					
+					if (options.editor === 'sublime') {
+						str += fail(e.toUpperCase()) + ' at ' + position.source + ':' + position.line + ':' + position.column;
+					}
+					if (options.editor === 'webstorm') {
+						str += fail(e.toUpperCase()) + ' at ' + position.source + '(' + position.line + ',' + position.column + '):';
+					}
 
-					str += fail(e.toUpperCase()) + ' at ' + position.source + '(' + position.line + ',' + position.column + '):';
 					str += '\n' + (err.code ? warn('[' + err.code + ']') + ' ' : '');
 					str += warn(err.reason ? err.reason : '<undefined reason>');
 					if (typeof err.evidence !== 'undefined') {
